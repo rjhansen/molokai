@@ -124,7 +124,7 @@ func getZoneIdForSensor(db *sql.DB, timestamp time.Time) int {
 			log.Warn().Msg("couldn't insert zone record!")
 			return -1
 		} else {
-			logf.Info().Msgf("inserted zone %s into zone table",
+			log.Info().Msgf("inserted zone %s into zone table",
 			zoneName)
 		}
 	}
