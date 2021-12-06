@@ -89,9 +89,11 @@ func getIdForSensor(db *sql.DB, id string) int {
 			log.Warn().Msgf("couldn't insert sensor record: %v",
 			err)
 			return -1
+		} else {
+			log.Info().Msgf("inserted sensor %s into sensor table",
+				id)
 		}
 	}
-	log.Info().Msgf("inserted sensor %s into sensor table", id)
 	if err = db.QueryRow(sensorQuery).Scan(&idNum); err != nil {
 		log.Warn().Msgf(
 			"could not read sensor %s, it should be there… %v",
@@ -121,9 +123,11 @@ func getZoneIdForSensor(db *sql.DB, timestamp time.Time) int {
 		if _, err = db.Exec(zoneInsertStr); err != nil {
 			log.Warn().Msg("couldn't insert zone record!")
 			return -1
+		} else {
+			logf.Info().Msgf("inserted zone %s into zone table",
+			zoneName)
 		}
 	}
-	log.Info().Msgf("inserted zone %s into time zone table", zoneName)
 	
 	if nil != db.QueryRow(zoneQuery).Scan(&zoneNum) {
 		log.Warn().Msgf(
