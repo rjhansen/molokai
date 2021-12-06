@@ -1,0 +1,9 @@
+[Unit]
+Description=Uploads thermosensor data to a MariaDB instance
+After=kure.service
+
+[Service]
+ExecStart=/usr/local/bin/molokai
+
+[Install]
+WantedBy=multi-user.target
