@@ -82,19 +82,20 @@ func getIdForSensor(db *sql.DB, id string) int {
 		"SELECT id FROM sensors WHERE name='%s'",
 		id)
 	if err = db.QueryRow(sensorQuery).Scan(&idNum); err != nil {
-		log.Info().Msgf("inserting sensor %s into sensor table…", id)
 		sensorInsertStr := fmt.Sprintf(
 			"INSERT INTO sensors(name) VALUES ('%s')",
 			id)
 		if _, err = db.Exec(sensorInsertStr); err != nil {
-			log.Warn().Msg("couldn't insert sensor record!")
+			log.Warn().Msgf("couldn't insert sensor record: %v",
+			err)
 			return -1
 		}
 	}
+	log.Info().Msgf("inserted sensor %s into sensor table", id)
 	if err = db.QueryRow(sensorQuery).Scan(&idNum); err != nil {
 		log.Warn().Msgf(
-			"could not read sensor %s, it should be there…",
-			id)
+			"could not read sensor %s, it should be there… %v",
+			id, err)
 		return -1
 	}
 	return idNum
@@ -114,7 +115,6 @@ func getZoneIdForSensor(db *sql.DB, timestamp time.Time) int {
 		zoneName)
 
 	if err = db.QueryRow(zoneQuery).Scan(&zoneNum); err != nil {
-		log.Info().Msgf("inserting zone %s into time zone table…", zoneName)
 		zoneInsertStr := fmt.Sprintf(
 			"INSERT INTO time_zones(name) VALUES ('%s')",
 			zoneName)
@@ -123,6 +123,8 @@ func getZoneIdForSensor(db *sql.DB, timestamp time.Time) int {
 			return -1
 		}
 	}
+	log.Info().Msgf("inserted zone %s into time zone table", zoneName)
+	
 	if nil != db.QueryRow(zoneQuery).Scan(&zoneNum) {
 		log.Warn().Msgf(
 			"could not read zone %s, it should be there…",
@@ -158,8 +160,6 @@ func insertSensorRecord(db *sql.DB, sensor string, reading Reading) bool {
 			"collected_at, zone_id) "+
 			"VALUES (%d, %3.2f, '%s', %d)",
 		sensorId, reading.Temperature, mariaDbTimestamp, zoneId)
-	log.Info().Msgf("inserting %s / %3.2f C at %s",
-		sensor, reading.Temperature, mariaDbTimestamp)
 	if _, err = db.Exec(recordStr); err != nil {
 		log.Warn().Msgf("could not insert %s / %3.2f C at %s: %v",
 			strings.ReplaceAll(
@@ -171,6 +171,8 @@ func insertSensorRecord(db *sql.DB, sensor string, reading Reading) bool {
 			err)
 		return false
 	}
+	log.Info().Msgf("inserted %s / %3.2f C at %s",
+		sensor, reading.Temperature, mariaDbTimestamp)
 	return true
 }
 
@@ -184,9 +186,8 @@ func updateTable() {
 		log.Warn().Msg("/tmp/kure.json could not be read")
 		return
 	}
-	fmt.Println(string(data))
 	if err = json.Unmarshal(data, &sensors); err != nil {
-		log.Warn().Msg("bad JSON in sensor file")
+		log.Warn().Msgf("bad JSON in sensor file: %v", err)
 		return
 	}
 

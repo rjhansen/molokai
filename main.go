@@ -17,9 +17,7 @@
 package main
 
 import (
-	"github.com/fsnotify/fsnotify"
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/rs/zerolog/log"
+	"time"
 )
 
 func init() {
@@ -30,20 +28,16 @@ func init() {
 }
 
 func main() {
-	var watcher *fsnotify.Watcher
-	var err error
 	done := make(chan bool)
 
-	if watcher, err = fsnotify.NewWatcher(); err != nil {
-		log.Fatal().Msg("could not initialize file watcher!")
-		panic("could not initialize file watcher")
-	}
-	defer func() { _ = watcher.Close() }()
-	if err = watcher.Add("/tmp/kure.json"); err != nil {
-		log.Fatal().Msgf("could not add file to watcher: %v", err)
-	}
+	updateTable()
 
-	go watchSensor(watcher)
+	go func() {
+		for {
+			time.Sleep(30 * time.Second)
+			updateTable()
+		}
+	}()
 
 	<-done
 }
