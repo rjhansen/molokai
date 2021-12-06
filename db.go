@@ -184,6 +184,7 @@ func updateTable() {
 		log.Warn().Msg("/tmp/kure.json could not be read")
 		return
 	}
+	fmt.Println(string(data))
 	if err = json.Unmarshal(data, &sensors); err != nil {
 		log.Warn().Msg("bad JSON in sensor file")
 		return
